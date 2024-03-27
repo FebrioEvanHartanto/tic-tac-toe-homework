@@ -1,74 +1,59 @@
+import {useState} from "react"
 
-import * as React from 'react';
+function Square ({value, onSquareClick, index}) {
 
-function Board() {
-  const squares = Array(9).fill(null);
-  function selectSquare(square) {
-
+  return <button className="border-solid border-[1px] border-black w-[100px] h-[100px]" onClick={onSquareClick} >
+    <p className={`text-3xl font-bold ${value === "X" ? "text-green-600" : "text-red-600"}`}>{value}</p></button>
+}
+export default function Board () {
+  const [xIsNext, setXIsNext] = useState(true);
+  const [squares, setSquares] = useState(Array(9).fill(null));
+  const winner = findWinner(squares);
+  let status;
+  if (winner) {
+    status = "Game Over! The Winner is: " + winner;
+  } else {
+    status = "Next player: " + (xIsNext ? "X" : "O");
   }
 
-  function restart() {
+  function handleClick(i) {
+
+    if(squares[i] || findWinner(squares)){
+      return;
+    }
+
+    const nextSquares = squares.slice();
+    if(xIsNext) {
+      nextSquares[i] = "X"
+    } else {
+      nextSquares[i] = "O"
+    }
+    setSquares(nextSquares);
+    setXIsNext(!xIsNext);
   }
 
-  function renderSquare(i) {
-    return (
-      <button className="square" onClick={() => selectSquare(i)}>
-        {squares[i]}
-      </button>
-    );
+  function resetGame() {
+    setSquares(Array(9).fill(null));
+    setXIsNext(true);
   }
 
   return (
-    <div>
-      <div >STATUS</div>
-      <div >
-        {renderSquare(0)}
-        {renderSquare(1)}
-        {renderSquare(2)}
+  <>
+  <div className="flex flex-col items-center">
+    <h1 className="text-center text-5xl text-blue-900 font-bold my-10">TIC-TAC-TOE</h1>
+    <div className="text-3xl text-center">{status}</div>
+      <div className="flex flex-wrap w-[300px] mx-auto mt-5">
+      {squares.map((value, index) => (
+            <Square key={index} value={value} onSquareClick={() => handleClick(index)} />
+          ))}
       </div>
-      <div >
-        {renderSquare(3)}
-        {renderSquare(4)}
-        {renderSquare(5)}
+      <button className="w-[100px] h-[50px] bg-blue-900 text-white font-bold rounded-lg mt-10" onClick={resetGame}>Reset Game</button>
       </div>
-      <div >
-        {renderSquare(6)}
-        {renderSquare(7)}
-        {renderSquare(8)}
-      </div>
-      <button onClick={restart}>
-        restart
-      </button>
-    </div>
-  );
+  </>
+  )
 }
 
-function Game() {
-  return (
-    <div >
-      <div >
-        <Board />
-      </div>
-    </div>
-  );
-}
-
-// eslint-disable-next-line no-unused-vars
-function calculateStatus(winner, squares, nextValue) {
-  return winner
-    ? `Winner: ${winner}`
-    : squares.every(Boolean)
-      ? `Scratch: Cat's game`
-      : `Next player: ${nextValue}`;
-}
-
-// eslint-disable-next-line no-unused-vars
-function calculateNextValue(squares) {
-  return squares.filter(Boolean).length % 2 === 0 ? 'X' : 'O';
-}
-
-// eslint-disable-next-line no-unused-vars
-function calculateWinner(squares) {
+function findWinner(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -77,7 +62,7 @@ function calculateWinner(squares) {
     [1, 4, 7],
     [2, 5, 8],
     [0, 4, 8],
-    [2, 4, 6],
+    [2, 4, 6]
   ];
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
@@ -88,8 +73,3 @@ function calculateWinner(squares) {
   return null;
 }
 
-function App() {
-  return <Game />;
-}
-
-export default App;
